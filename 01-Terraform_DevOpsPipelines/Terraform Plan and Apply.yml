@@ -1,0 +1,111 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - terraform/
+
+pool:
+  name: Azure Pipelines
+
+variables:
+- group: devops-kvlt002-vars
+
+stages:
+# Stage 1: Plan
+- stage: Plan
+  displayName: "Terraform Plan Stage"
+  jobs:
+  - job: Plan
+    displayName: "Terraform Plan Job"
+    steps:
+    - task: TerraformInstaller@0
+      displayName: Install Terraform 1.10.2
+      inputs:
+        terraformVersion: '1.10.2'
+
+    - task: TerraformCLI@2
+      displayName: Terraform Init
+      inputs:
+        command: 'init'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+        commandOptions: '-backend-config="access_key=$(devlabstg-key1)"'
+        allowTelemetryCollection: false
+
+    - task: TerraformCLI@2
+      displayName: Terraform Validate
+      inputs:
+        command: 'validate'
+        workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+        allowTelemetryCollection: true
+
+    - task: TerraformCLI@2
+      displayName: Terraform Plan
+      inputs:
+        command: 'plan'
+        workingDirectory: 'terraform'
+        commandOptions: '-input=false -out=tfplan -var="spn-client-id=$(spn-client-id)" -var="spn-client-secret=$(spn-client-secret)" -var="spn-tenant-id=$(spn-tenant-id)" -var="subscription_id=$(sub-id)"'
+        allowTelemetryCollection: false
+    
+    - task: ArchiveFiles@2
+      displayName: Archive Terraform Plan Files
+      inputs:
+        rootFolderOrFile: 'terraform'
+        includeRootFolder: false
+        archiveType: 'tar'
+        archiveFile: '$(Build.ArtifactStagingDirectory)/tfplan.tgz'
+        replaceExistingArchive: true
+    
+    - task: PublishPipelineArtifact@1
+      displayName: Publish Terraform Plan Artifact
+      inputs:
+        targetPath: '$(Build.ArtifactStagingDirectory)/tfplan.tgz'
+        artifact: 'terraform-plan-artifact'
+        publishLocation: 'pipeline'
+        fileSharePath: 
+
+- stage: Apply
+  displayName: "Terraform Apply Stage"
+  dependsOn: Plan
+  condition: succeeded()
+  jobs:
+  - deployment: TerraformApply 
+    displayName: Terraform Apply
+    environment: Production
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+        
+          # - task: DownloadPipelineArtifact@2
+          #   displayName: Download Terraform Plan Artifact
+          #   inputs:
+          #     artifact: 'terraform-plan-artifact'
+          #     targetPath: $(Pipeline.Workspace)
+          - task: ExtractFiles@1
+            displayName: 'Extract TFplan file'
+            inputs:
+              archiveFilePatterns: $(Pipeline.Workspace)/terraform-plan-artifact/tfplan.tgz
+              destinationFolder: $(System.DefaultWorkingDirectory)/
+              cleanDestinationFolder: false
+          - task: TerraformInstaller@0
+            displayName: Install Terraform 1.10.2
+            inputs:
+              terraformVersion: '1.10.2'
+          - task: TerraformCLI@2
+            displayName: Terraform Init
+            inputs:
+              command: 'init'
+              workingDirectory: '$(System.DefaultWorkingDirectory)'
+              commandOptions: '-backend-config="access_key=$(devlabstg-key1)"'
+              allowTelemetryCollection: false
+
+          - task: TerraformCLI@2
+            displayName: Terraform Apply
+            inputs:
+              command: 'apply'
+              workingDirectory: 
+              commandOptions: '-input=false tfplan'
+              allowTelemetryCollection: false
+

@@ -1,0 +1,41 @@
+trigger: none
+
+pool:
+  name: Azure Pipelines
+
+variables:
+- group: devops-kvlt002-vars
+
+steps:
+ - task: TerraformInstaller@0
+   displayName: Install Terraform 0.14.6
+   inputs:
+     terraformVersion: '0.14.6'
+
+ - task: CmdLine@2
+   displayName: Terraform Format Check
+   inputs:
+     script: 'terraform fmt -check -recursive'
+
+ - task: TerraformCLI@2
+   displayName: Terraform Init
+   inputs:
+      command: 'init'
+      workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+      commandOptions: '-backend-config="access_key=$(devlabstg-key1)"'
+      allowTelemetryCollection: false
+
+ - task: TerraformCLI@2
+   displayName: Terraform Validate
+   inputs:
+     command: 'validate'
+     workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+     allowTelemetryCollection: true
+
+ - task: TerraformCLI@2
+   displayName: Terraform Plan
+   inputs:
+     command: 'plan'
+     workingDirectory: 'terraform'
+     commandOptions: '-input=false -out=tfplan -var="spn-client-id=$(spn-client-id)" -var="spn-client-secret=$(spn-client-secret)" -var="spn-tenant-id=$(spn-tenant-id)" -var="subscription_id=$(sub-id)"'
+     allowTelemetryCollection: false
