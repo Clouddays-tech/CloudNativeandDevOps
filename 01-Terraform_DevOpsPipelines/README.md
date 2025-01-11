@@ -1,20 +1,20 @@
-# Introduction 
-Azure Devops pipeline for Terraform deployment.
+## Building Terraform CICD Pipeline in Azure DevOps
 
-# Getting Started
-TODO: Guide users through getting your code up and running on their own system. In this section you can talk about:
-1.	Installation process
-2.	Software dependencies
-3.	Latest releases
-4.	API references
+In this lab, I’ll demonstrate how to build a Terraform CI/CD pipeline for production environments. While this lab will create only a resource group using Terraform, the idea is to showcase how should Terraform CI/CD pipeline be configured. Detailed technical explanations and step-by-step instructions will be shown later and upload a video tutorial.
 
-# Build and Test
-TODO: Describe and show how to build your code and run the tests. 
+Pipeline Overview
 
-# Contribute
-TODO: Explain how other users and developers can contribute to make your code better. 
+The pipeline YAML files and Terraform code are available in this repository. Though the syntax is specific to Azure DevOps YAML pipelines, the same principles/workflows apply to other CI/CD platforms like GitHub Actions, GitLab, and Bamboo.
 
-If you want to learn more about creating good readme files then refer the following [guidelines](https://docs.microsoft.com/en-us/azure/devops/repos/git/create-a-readme?view=azure-devops). You can also seek inspiration from the below readme files:
-- [ASP.NET Core](https://github.com/aspnet/Home)
-- [Visual Studio Code](https://github.com/Microsoft/vscode)
-- [Chakra Core](https://github.com/Microsoft/ChakraCore)
+Here’s the pipeline workflow:
+
+Branch Protection Policies
+Implement branch protection to prevent direct merges into the main branch to ensure code changes are reviewed and validated before deployment.
+Pull Request Validation
+When a pull request is created, the pipeline triggers tasks for Terraform linting, formatting (fmt), and validation. Once these checks pass, a DevOps engineer must approve the pull request to merge feature branch to main.
+Terraform Plan file Generation
+After the pull request is approved and merged, the pipeline generates a Terraform plan file. This plan file is compressed and uploaded as an artifact in the pipeline.
+Manual Approval and Release
+The release stage is triggered only after manual approval in the pipeline. Then, Terraform will apply IAC codes using the plan file.
+
+- Complete pipeline at https://medium.com/@mr.shwelinhtet/building-terraform-cicd-pipeline-in-azure-devops-2a9aebdfe3e4
