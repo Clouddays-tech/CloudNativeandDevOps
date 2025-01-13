@@ -3,16 +3,28 @@ repos:
   rev: v1.96.3 # Get the latest from: https://github.com/antonbabenko/pre-commit-terraform/releases
   hooks:
     - id: terraform_fmt
+    # - id: terraform_validate
     - id: terraform_docs
-      args:
+      args: 
         - --hook-config=--path-to-file=README.md        # Valid UNIX path. I.e. ../TFDOC.md or docs/README.md etc.
         - --hook-config=--add-to-existing-file=true     # Boolean. true or false
-        - --hook-config=--create-file-if-not-exist=true # Boolean. true or false
-        - --hook-config=--use-standard-markers=true  
+        - --hook-config=--create-file-if-not-exist=true # Boolean. true or false 
     - id: terraform_tflint
       args:
-        - --args=--config=__GIT_WORKING_DIR__/02-Terraform-AKSCluster/.tflint.hcl   # Boolean. Defaults to true (v1.93+), false (<v1.93). Set to true for compatibility with terraform-docs
+        - --args=--config="__GIT_WORKING_DIR__/02-Terraform-AKSCluster/.tflint.hcl" 
 
+    - id: terraform_trivy
+      args:
+        - --args=--skip-dirs="./kubernetes-*" # Skip scanning Kubernetes manifests
+        - --args=--severity=HIGH
+        
+    - id: terraform_checkov
+      args:
+        - --args=--quiet
+        - --args=--skip-check CKV2_AWS_8
+        - --args=--framework terraform
+        - --args=--directory .
+        - --args=--check MEDIUM  # Require API
 
 # repos:
 #   - repo: https://github.com/pre-commit/mirrors-terrafmt

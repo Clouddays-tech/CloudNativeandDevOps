@@ -1,12 +1,17 @@
+TFLINT_CONFIG=$(shell pwd)/.tflint.hcl
+
 # Default target, run all checks (lint, format, pre-commit)
 all: lint format pre-commit
 
 # Run TFLint to check Terraform files
 lint:
-	@tflint --config ./.tflint.hcl
+	@tflint --config $(TFLINT_CONFIG) --recursive --call-module-type=all
 	@terraform fmt -recursive
+	@echo "linting done"
 
-# Run terraform fmt to check if files are formatted
+sec:
+	@trivy fs --scanners secret,misconfig ./ --skip-dirs ./kubernetes-* --severity HIGH,CRITICAL,MEDIUM --tf-vars terraform.tfvars
+
 format:
 	@terraform fmt -check -diff
 

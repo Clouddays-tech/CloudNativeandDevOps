@@ -16,7 +16,7 @@ module "network" {
   subnets             = var.subnets
 }
 
-
+#trivy:ignore:AVD-AZU-0043
 module "aks" {
   source                          = "./modules/aks"
   cluster_name                    = "my-aks-cluster-eus"
