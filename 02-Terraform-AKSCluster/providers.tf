@@ -13,3 +13,12 @@ terraform {
     }
   }
 }
+
+# locals {
+#   default_tags = {
+#     environment = "Production"
+#     owner       = "Platform Team"
+#     region      = "eastus"
+#     project     = "AKS Terraform"
+#   }
+# }

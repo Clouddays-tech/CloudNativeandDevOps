@@ -8,7 +8,9 @@
 
 ## Providers
 
-No providers.
+| Name | Version |
+|------|---------|
+| <a name="provider_azurerm"></a> [azurerm](#provider\_azurerm) | 4.3.0 |
 
 ## Modules
 
@@ -20,15 +22,21 @@ No providers.
 
 ## Resources
 
-No resources.
+| Name | Type |
+|------|------|
+| [azurerm_network_security_rule.allow_agw_ports](https://registry.terraform.io/providers/hashicorp/azurerm/4.3.0/docs/resources/network_security_rule) | resource |
+| [azurerm_network_security_rule.rdp_rule](https://registry.terraform.io/providers/hashicorp/azurerm/4.3.0/docs/resources/network_security_rule) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 |------|-------------|------|---------|:--------:|
 | <a name="input_acr_name"></a> [acr\_name](#input\_acr\_name) | ACR name | `string` | n/a | yes |
+| <a name="input_common_tags"></a> [common\_tags](#input\_common\_tags) | n/a | `map(string)` | <pre>{<br/>  "environment": "Development",<br/>  "owner": "Platform Team",<br/>  "project": "AKS Terraform",<br/>  "region": "eastus"<br/>}</pre> | no |
+| <a name="input_create_nsgs"></a> [create\_nsgs](#input\_create\_nsgs) | Flag to determine if NSGs should be created and associated with subnets. | `bool` | n/a | yes |
 | <a name="input_kubernetes_version"></a> [kubernetes\_version](#input\_kubernetes\_version) | Kubernetes version | `string` | n/a | yes |
 | <a name="input_location"></a> [location](#input\_location) | Resources location in Azure | `string` | n/a | yes |
+| <a name="input_nsg_rules"></a> [nsg\_rules](#input\_nsg\_rules) | List of NSG rules with name, priority, and port | <pre>list(object({<br/>  name = string, priority = number, port = number }))</pre> | n/a | yes |
 | <a name="input_rbac_aad_admin_group_object_ids"></a> [rbac\_aad\_admin\_group\_object\_ids](#input\_rbac\_aad\_admin\_group\_object\_ids) | Object ID of groups with admin access. | `list(string)` | `null` | no |
 | <a name="input_rbac_aad_azure_rbac_enabled"></a> [rbac\_aad\_azure\_rbac\_enabled](#input\_rbac\_aad\_azure\_rbac\_enabled) | (Optional) Is Role Based Access Control based on Azure AD enabled? | `bool` | `null` | no |
 | <a name="input_rbac_aad_tenant_id"></a> [rbac\_aad\_tenant\_id](#input\_rbac\_aad\_tenant\_id) | (Optional) The Tenant ID used for Azure Active Directory Application. If this isn't specified the Tenant ID of the current Subscription is used. | `string` | `null` | no |

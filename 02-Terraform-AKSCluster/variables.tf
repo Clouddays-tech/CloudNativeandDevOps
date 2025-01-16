@@ -1,3 +1,13 @@
+variable "common_tags" {
+  type = map(string)
+  default = {
+    environment = "Development"
+    owner       = "Platform Team"
+    region      = "eastus"
+    project     = "AKS Terraform"
+  }
+}
+
 variable "subscription_id" {
   type        = string
   description = "Subscription ID"
@@ -40,6 +50,17 @@ variable "subnets" {
     name           = string
     address_prefix = string
   }))
+}
+
+variable "create_nsgs" {
+  description = "Flag to determine if NSGs should be created and associated with subnets."
+  type        = bool
+}
+
+variable "nsg_rules" {
+  description = "List of NSG rules with name, priority, and port"
+  type = list(object({
+  name = string, priority = number, port = number }))
 }
 
 variable "rbac_aad_admin_group_object_ids" {

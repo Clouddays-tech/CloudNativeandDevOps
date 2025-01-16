@@ -72,10 +72,7 @@ variable "rbac_aad_tenant_id" {
   default     = null
   description = "(Optional) The Tenant ID used for Azure Active Directory Application. If this isn't specified the Tenant ID of the current Subscription is used."
 }
-# variable "vnet_id" {
-#   description = "The ID of the Virtual Network where AKS will be deployed"
-#   type        = string
-# }
+
 variable "vnet_name" {
   description = "The name of the Virtual Network"
   type        = string

@@ -1,4 +1,4 @@
-#trivy:ignore:AVD-AZU-0043
+#trivy:ignore:AVD-AZU-0043 #Kubernetes cluster does not have a network policy set.
 resource "azurerm_kubernetes_cluster" "aks" {
   name                = var.cluster_name
   kubernetes_version  = var.kubernetes_version != null ? var.kubernetes_version : "1.30.6" # Use a default if null
@@ -16,8 +16,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
 
 
   default_node_pool {
-    name           = "systempool"
-    node_count     = var.system_node_count
+    name       = "systempool"
+    node_count = var.system_node_count
+    # min_count      = 1
+    # max_count      = 2
     vm_size        = var.vm_size
     vnet_subnet_id = var.aks_subnet_id
     tags           = merge(var.tags, var.agents_tags)
@@ -70,14 +72,6 @@ resource "azurerm_role_assignment" "role_acrpull" {
   depends_on                       = [azurerm_container_registry.acr]
 }
 
-# Sleep for 15  seconds
-resource "null_resource" "wait_for_aks_creation" {
-  provisioner "local-exec" {
-    command = "sleep 15"
-  }
-  depends_on = [azurerm_kubernetes_cluster.aks]
-}
-
 # Retrieve User Assigned Managed Identity after sleep
 data "azurerm_user_assigned_identity" "agic_identity" {
   name                = "ingressapplicationgateway-${var.cluster_name}" #my-aks-cluster-eus"  #Update as required
@@ -95,4 +89,11 @@ resource "azurerm_role_assignment" "agic_network_contributor" {
   principal_id         = data.azurerm_user_assigned_identity.agic_identity.principal_id
   role_definition_name = "Network Contributor"
   scope                = data.azurerm_virtual_network.vnet.id
+}
+
+resource "null_resource" "wait_for_role_assignment" {
+  provisioner "local-exec" {
+    command = "sleep 30"
+  }
+  depends_on = [azurerm_role_assignment.agic_network_contributor]
 }

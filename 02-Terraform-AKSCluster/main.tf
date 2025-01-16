@@ -1,19 +1,22 @@
 
 module "rsg" {
-  source = "./modules/rsg"
-
+  source              = "./modules/rsg"
   resource_group_name = var.resource_group_name
   location            = var.location
 }
 
 module "network" {
-  source = "./modules/network"
-
+  source              = "./modules/network"
   vnet_name           = var.vnet_name
   resource_group_name = module.rsg.aks_rg_name
   location            = var.location
   address_space       = ["10.0.0.0/16"]
   subnets             = var.subnets
+  create_nsgs         = var.create_nsgs
+  nsg_rules           = var.nsg_rules
+  tags = merge(var.common_tags, {
+    resource = "Virtual Network"
+  })
 }
 
 #trivy:ignore:AVD-AZU-0043
@@ -33,13 +36,11 @@ module "aks" {
   agw_subnet_id                   = module.network.subnet_ids[2]
   vnet_name                       = var.vnet_name
 
-  tags = {
-    environment = "Production"
-    owner       = "Platform Team"
-    region      = "eastus"
-  }
-  agents_tags = {
-    environment = "Production"
-    role        = "Node Pool"
-  }
+  tags = merge(var.common_tags, {
+    resource = "Kubernetes Cluster"
+  })
+  #   agents_tags = {
+  #     environment = "Production"
+  #     role        = "Node Pool"
+  #   }
 }
